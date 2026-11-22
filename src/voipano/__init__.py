@@ -16,7 +16,7 @@ from .exceptions import (
 )
 from .webhooks import RejectAllVerifier, WebhookReceiver, WebhookVerifier
 
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 Voipano = VoipanoClient
 
 __all__ = [

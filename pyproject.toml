@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "voipano"
-version = "1.0.1"
+version = "1.0.2"
 description = "Official Python SDK for the Voipano Public API v1"
 readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">=3.11"
