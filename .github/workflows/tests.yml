@@ -18,6 +18,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Check public secrets
+        run: python scripts/check-public-secrets.py
+
       - name: Install package and tooling
         run: python -m pip install -e '.[dev]'
       - name: Run offline unit and API-contract tests
