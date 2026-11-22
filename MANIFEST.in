@@ -1,0 +1,7 @@
+include LICENSE
+include README.md README.fa.md CHANGELOG.md SECURITY.md
+recursive-include docs *.json
+recursive-include tests *.py
+recursive-include src/voipano py.typed
+prune .github
+exclude .gitignore

@@ -1,0 +1,1069 @@
+{
+  "info": {
+    "_postman_id": "5b5aac3e-4107-4ee3-9875-38d841cd8eb1",
+    "name": "Voipano Public API v1",
+    "description": "کالکشن رسمی API عمومی کاربران ویپانو. نسخه مستندات: 2026.11.21. مقدار api_token را تنظیم کنید و اگر توکن به سرویس مشخصی متصل نیست، service_id را نیز وارد کنید. درخواست‌های نوشتنی تا زمان فعال‌کردن allow_write_requests اجرا نمی‌شوند.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{api_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "api_base_url",
+      "value": "https://voipano.com/api/v1/webservice",
+      "type": "string"
+    },
+    {
+      "key": "api_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "service_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "allow_write_requests",
+      "value": "false",
+      "type": "string"
+    },
+    {
+      "key": "documentation_version",
+      "value": "2026.11.21",
+      "type": "string"
+    },
+    {
+      "key": "contact_id",
+      "value": "contact_01J9M8K2Q7",
+      "type": "string"
+    },
+    {
+      "key": "contact_group_id",
+      "value": "group_01J9M8K2Q7",
+      "type": "string"
+    },
+    {
+      "key": "cdr_id",
+      "value": "cdr_01J9M8K2Q7",
+      "type": "string"
+    },
+    {
+      "key": "voicemail_unique_id",
+      "value": "vm_01J9M8K2Q7",
+      "type": "string"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const requestId = pm.variables.replaceIn('{{$guid}}');",
+          "pm.variables.set('request_id', requestId);",
+          "if (!pm.request.headers.get('Accept')) {",
+          "  pm.request.headers.upsert({ key: 'Accept', value: 'application/json' });",
+          "}",
+          "pm.request.headers.upsert({ key: 'X-Request-Id', value: requestId });",
+          "",
+          "const serviceId = String(pm.collectionVariables.get('service_id') || '').trim();",
+          "if (serviceId) {",
+          "  pm.request.headers.upsert({ key: 'X-Webservice-Service-Id', value: serviceId });",
+          "} else {",
+          "  pm.request.headers.remove('X-Webservice-Service-Id');",
+          "}",
+          "",
+          "const writeMethods = ['POST', 'PUT', 'PATCH', 'DELETE'];",
+          "const writesAllowed = String(pm.collectionVariables.get('allow_write_requests') || '').toLowerCase() === 'true';",
+          "if (writeMethods.includes(pm.request.method) && !writesAllowed) {",
+          "  const message = 'این درخواست عملیات واقعی انجام می‌دهد. برای اجرا، allow_write_requests را روی true قرار دهید.';",
+          "  console.warn(message);",
+          "  if (pm.execution && typeof pm.execution.skipRequest === 'function') {",
+          "    pm.execution.skipRequest();",
+          "  } else {",
+          "    throw new Error(message);",
+          "  }",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test('پاسخ HTTP دریافت شد', function () {",
+          "  pm.expect(pm.response.code).to.be.within(100, 599);",
+          "});",
+          "",
+          "const contentType = String(pm.response.headers.get('Content-Type') || '').toLowerCase();",
+          "if (contentType.includes('json')) {",
+          "  let body;",
+          "  pm.test('بدنه JSON معتبر است', function () {",
+          "    body = pm.response.json();",
+          "    pm.expect(body).to.be.an('object');",
+          "  });",
+          "",
+          "  if (body && Object.prototype.hasOwnProperty.call(body, 'ok')) {",
+          "    pm.test('فیلد ok از نوع boolean است', function () {",
+          "      pm.expect(body.ok).to.be.a('boolean');",
+          "    });",
+          "  }",
+          "}",
+          "",
+          "const responseRequestId = pm.response.headers.get('X-Request-Id');",
+          "if (responseRequestId) {",
+          "  pm.test('شناسه درخواست در پاسخ بازگردانده شد', function () {",
+          "    pm.expect(responseRequestId).to.eql(pm.variables.get('request_id'));",
+          "  });",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "سرویس و دسترسی حساب",
+      "description": "کار را با بررسی سرویس‌های متصل به توکن، وضعیت اشتراک و خط در دسترس آغاز کنید.",
+      "item": [
+        {
+          "name": "دریافت فهرست سرویس‌ها",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/services",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "services"
+              ],
+              "query": []
+            },
+            "description": "سرویس یا اشتراک متصل به توکن یا سرویس انتخاب‌شده با X-Webservice-Service-Id را همراه با وضعیت، تاریخ‌ها، بسته و شماره خط دریافت می‌کند.\n\nاین endpoint پارامتر ورودی ندارد."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "مخاطبین و گروه‌ها",
+      "description": "دفترچه مخاطبین، اطلاعات تکمیلی، درون‌ریزی گروهی و گروه‌بندی مخاطبان از این مجموعه endpointها مدیریت می‌شود.",
+      "item": [
+        {
+          "name": "فهرست و جست‌وجوی مخاطبین",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/contacts?group_id=&search=&endpoint_number=02191010001&page=1&per_page=20&sort=first_name%2Clast_name&client_ref=contacts-1001",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "contacts"
+              ],
+              "query": [
+                {
+                  "key": "group_id",
+                  "value": "",
+                  "description": "محدودکردن نتیجه به یک گروه مخاطب"
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "عبارت جست‌وجو"
+                },
+                {
+                  "key": "endpoint_number",
+                  "value": "02191010001",
+                  "description": "خط هدف؛ پیش‌فرض سرویس متصل به توکن"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "شماره صفحه"
+                },
+                {
+                  "key": "per_page",
+                  "value": "20",
+                  "description": "تعداد رکورد در صفحه؛ حداکثر 100"
+                },
+                {
+                  "key": "sort",
+                  "value": "first_name,last_name",
+                  "description": "ترتیب نتیجه؛ مانند first_name,last_name"
+                },
+                {
+                  "key": "client_ref",
+                  "value": "contacts-1001",
+                  "description": "شناسه رهگیری سمت سامانه شما"
+                }
+              ]
+            },
+            "description": "مخاطبین دفترچه مرکز تماس را فهرست یا براساس گروه، عبارت جست‌وجو و خط هدف محدود می‌کند و از مرتب‌سازی و صفحه‌بندی پشتیبانی می‌کند.\n\n| پارامتر | محل | نوع | وضعیت | توضیح |\n| --- | --- | --- | --- | --- |\n| `group_id` | query | string | اختیاری | محدودکردن نتیجه به یک گروه مخاطب |\n| `search` | query | string | اختیاری | عبارت جست‌وجو |\n| `endpoint_number` | query | string | اختیاری | خط هدف؛ پیش‌فرض سرویس متصل به توکن |\n| `page` | query | integer | اختیاری | شماره صفحه |\n| `per_page` | query | integer | اختیاری | تعداد رکورد در صفحه؛ حداکثر 100 |\n| `sort` | query | string | اختیاری | ترتیب نتیجه؛ مانند first_name,last_name |\n| `client_ref` | query | string | اختیاری | شناسه رهگیری سمت سامانه شما |"
+          },
+          "response": []
+        },
+        {
+          "name": "مشاهده مخاطب",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/contacts/{{contact_id}}",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "contacts",
+                "{{contact_id}}"
+              ],
+              "query": []
+            },
+            "description": "اطلاعات یک مخاطب را با شناسه‌ای که API مخاطبین برگردانده است دریافت می‌کند.\n\n| پارامتر | محل | نوع | وضعیت | توضیح |\n| --- | --- | --- | --- | --- |\n| `contact_id` | path | string | الزامی | شناسه مخاطب |"
+          },
+          "response": []
+        },
+        {
+          "name": "ایجاد مخاطب",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/contacts",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "contacts"
+              ],
+              "query": []
+            },
+            "description": "یک مخاطب را همراه با شماره‌ها، مشخصات سازمانی، موقعیت، برچسب، یادداشت، متادیتا و گروه‌ها ایجاد می‌کند.\n\n| پارامتر | محل | نوع | وضعیت | توضیح |\n| --- | --- | --- | --- | --- |\n| `primary_number` | body | string | الزامی | شماره اصلی مخاطب |\n| `first_name` | body | string | اختیاری | نام |\n| `last_name` | body | string | اختیاری | نام خانوادگی |\n| `secondary_numbers` | body | array | اختیاری | شماره‌های فرعی مخاطب |\n| `email` | body | string | اختیاری | ایمیل |\n| `organization` | body | string | اختیاری | نام سازمان |\n| `job_title` | body | string | اختیاری | عنوان شغلی |\n| `country` | body | string | اختیاری | کشور مخاطب |\n| `province` | body | string | اختیاری | استان مخاطب |\n| `city` | body | string | اختیاری | شهر مخاطب |\n| `address` | body | string | اختیاری | نشانی مخاطب |\n| `timezone` | body | string | اختیاری | منطقه زمانی؛ مانند Asia/Tehran |\n| `language` | body | string | اختیاری | کد زبان؛ مانند fa |\n| `tags` | body | array | اختیاری | برچسب‌های مخاطب |\n| `notes` | body | array | اختیاری | یادداشت‌های مخاطب |\n| `metadata` | body | object | اختیاری | متادیتای دلخواه |\n| `group_id` | body | string | اختیاری | شناسه یک گروه مخاطب |\n| `group_ids` | body | array | اختیاری | شناسه گروه‌های مخاطب |\n| `client_ref` | body | string | اختیاری | شناسه رهگیری سمت سامانه شما |",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"primary_number\": \"09120000000\",\n  \"first_name\": \"کاربر\",\n  \"last_name\": \"محترم ویپانو\",\n  \"secondary_numbers\": [\n    \"09350000000\",\n    \"02191010001\"\n  ],\n  \"email\": \"user@example.com\",\n  \"organization\": \"شرکت نمونه\",\n  \"job_title\": \"مدیر فروش\",\n  \"country\": \"ایران\",\n  \"province\": \"تهران\",\n  \"city\": \"تهران\",\n  \"address\": \"تهران\",\n  \"timezone\": \"Asia/Tehran\",\n  \"language\": \"fa\",\n  \"tags\": [\n    \"مشتری ویژه\"\n  ],\n  \"notes\": [\n    \"ایجادشده از وب‌سرویس\"\n  ],\n  \"metadata\": {\n    \"source\": \"website\"\n  },\n  \"group_id\": null,\n  \"group_ids\": [],\n  \"client_ref\": \"contact-create-1001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ویرایش مخاطب",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/contacts/{{contact_id}}",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "contacts",
+                "{{contact_id}}"
+              ],
+              "query": []
+            },
+            "description": "فقط فیلدهای ارسال‌شده را تغییر می‌دهد؛ ارسال آرایه خالی می‌تواند گروه‌ها، شماره‌های فرعی، برچسب‌ها یا یادداشت‌ها را پاک کند.\n\n| پارامتر | محل | نوع | وضعیت | توضیح |\n| --- | --- | --- | --- | --- |\n| `contact_id` | path | string | الزامی | شناسه مخاطب |\n| `first_name` | body | string | اختیاری | نام |\n| `last_name` | body | string | اختیاری | نام خانوادگی |\n| `primary_number` | body | string | اختیاری | شماره اصلی |\n| `secondary_numbers` | body | array | اختیاری | شماره‌های فرعی |\n| `email` | body | string | اختیاری | ایمیل |\n| `organization` | body | string | اختیاری | نام سازمان |\n| `job_title` | body | string | اختیاری | عنوان شغلی |\n| `country` | body | string | اختیاری | کشور مخاطب |\n| `province` | body | string | اختیاری | استان مخاطب |\n| `city` | body | string | اختیاری | شهر مخاطب |\n| `address` | body | string | اختیاری | نشانی مخاطب |\n| `timezone` | body | string | اختیاری | منطقه زمانی |\n| `language` | body | string | اختیاری | کد زبان |\n| `tags` | body | array | اختیاری | برچسب‌ها |\n| `notes` | body | array | اختیاری | یادداشت‌ها |\n| `metadata` | body | object | اختیاری | متادیتای دلخواه |\n| `group_id` | body | string | اختیاری | شناسه یک گروه |\n| `group_ids` | body | array | اختیاری | شناسه گروه‌ها |\n| `client_ref` | body | string | اختیاری | شناسه رهگیری سمت سامانه شما |",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"کاربر\",\n  \"last_name\": \"محترم ویپانو\",\n  \"primary_number\": \"09120000000\",\n  \"secondary_numbers\": [\n    \"09350000000\"\n  ],\n  \"email\": \"user@example.com\",\n  \"organization\": \"شرکت نمونه\",\n  \"job_title\": \"مدیر فروش\",\n  \"country\": \"ایران\",\n  \"province\": \"تهران\",\n  \"city\": \"تهران\",\n  \"address\": \"تهران\",\n  \"timezone\": \"Asia/Tehran\",\n  \"language\": \"fa\",\n  \"tags\": [\n    \"به‌روزشده\"\n  ],\n  \"notes\": [\n    \"اطلاعات به‌روزرسانی شد\"\n  ],\n  \"metadata\": {\n    \"source\": \"website\"\n  },\n  \"group_id\": null,\n  \"group_ids\": [],\n  \"client_ref\": \"contact-update-1001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "ویرایش مخاطب (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/contacts/{{contact_id}}",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "contacts",
+                "{{contact_id}}"
+              ],
+              "query": []
+            },
+            "description": "فقط فیلدهای ارسال‌شده را تغییر می‌دهد؛ ارسال آرایه خالی می‌تواند گروه‌ها، شماره‌های فرعی، برچسب‌ها یا یادداشت‌ها را پاک کند.\n\n| پارامتر | محل | نوع | وضعیت | توضیح |\n| --- | --- | --- | --- | --- |\n| `contact_id` | path | string | الزامی | شناسه مخاطب |\n| `first_name` | body | string | اختیاری | نام |\n| `last_name` | body | string | اختیاری | نام خانوادگی |\n| `primary_number` | body | string | اختیاری | شماره اصلی |\n| `secondary_numbers` | body | array | اختیاری | شماره‌های فرعی |\n| `email` | body | string | اختیاری | ایمیل |\n| `organization` | body | string | اختیاری | نام سازمان |\n| `job_title` | body | string | اختیاری | عنوان شغلی |\n| `country` | body | string | اختیاری | کشور مخاطب |\n| `province` | body | string | اختیاری | استان مخاطب |\n| `city` | body | string | اختیاری | شهر مخاطب |\n| `address` | body | string | اختیاری | نشانی مخاطب |\n| `timezone` | body | string | اختیاری | منطقه زمانی |\n| `language` | body | string | اختیاری | کد زبان |\n| `tags` | body | array | اختیاری | برچسب‌ها |\n| `notes` | body | array | اختیاری | یادداشت‌ها |\n| `metadata` | body | object | اختیاری | متادیتای دلخواه |\n| `group_id` | body | string | اختیاری | شناسه یک گروه |\n| `group_ids` | body | array | اختیاری | شناسه گروه‌ها |\n| `client_ref` | body | string | اختیاری | شناسه رهگیری سمت سامانه شما |",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"کاربر\",\n  \"last_name\": \"محترم ویپانو\",\n  \"primary_number\": \"09120000000\",\n  \"secondary_numbers\": [\n    \"09350000000\"\n  ],\n  \"email\": \"user@example.com\",\n  \"organization\": \"شرکت نمونه\",\n  \"job_title\": \"مدیر فروش\",\n  \"country\": \"ایران\",\n  \"province\": \"تهران\",\n  \"city\": \"تهران\",\n  \"address\": \"تهران\",\n  \"timezone\": \"Asia/Tehran\",\n  \"language\": \"fa\",\n  \"tags\": [\n    \"به‌روزشده\"\n  ],\n  \"notes\": [\n    \"اطلاعات به‌روزرسانی شد\"\n  ],\n  \"metadata\": {\n    \"source\": \"website\"\n  },\n  \"group_id\": null,\n  \"group_ids\": [],\n  \"client_ref\": \"contact-update-1001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "حذف مخاطب",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/contacts/{{contact_id}}",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "contacts",
+                "{{contact_id}}"
+              ],
+              "query": []
+            },
+            "description": "مخاطب مشخص‌شده را از دفترچه مرکز تماس حذف می‌کند.\n\n| پارامتر | محل | نوع | وضعیت | توضیح |\n| --- | --- | --- | --- | --- |\n| `contact_id` | path | string | الزامی | شناسه مخاطب |"
+          },
+          "response": []
+        },
+        {
+          "name": "درون‌ریزی گروهی مخاطبین",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/contacts/bulk-import",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "contacts",
+                "bulk-import"
+              ],
+              "query": []
+            },
+            "description": "بین 1 تا 3000 مخاطب را برای ایجاد یا به‌روزرسانی گروهی می‌پذیرد؛ پردازش داخلی در بسته‌های 100تایی انجام می‌شود.\n\n| پارامتر | محل | نوع | وضعیت | توضیح |\n| --- | --- | --- | --- | --- |\n| `contacts` | body | array | الزامی | آرایه 1 تا 3000 مخاطب |\n| `update_existing` | body | boolean | اختیاری | به‌روزرسانی مخاطب موجود؛ پیش‌فرض true |\n| `default_group_id` | body | string | اختیاری | شناسه گروه پیش‌فرض |\n| `client_ref` | body | string | اختیاری | شناسه رهگیری سمت سامانه شما |",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contacts\": [\n    {\n      \"first_name\": \"کاربر\",\n      \"last_name\": \"محترم ویپانو\",\n      \"primary_number\": \"09120000000\",\n      \"secondary_numbers\": [\n        \"09350000000\"\n      ]\n    }\n  ],\n  \"update_existing\": true,\n  \"default_group_id\": null,\n  \"client_ref\": \"contacts-import-1001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "فهرست گروه‌های مخاطب",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/contact-groups?page=1&per_page=100&sort=name&client_ref=groups-1001",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "contact-groups"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "شماره صفحه"
+                },
+                {
+                  "key": "per_page",
+                  "value": "100",
+                  "description": "تعداد گروه در هر صفحه"
+                },
+                {
+                  "key": "sort",
+                  "value": "name",
+                  "description": "ترتیب نتیجه؛ مانند name"
+                },
+                {
+                  "key": "client_ref",
+                  "value": "groups-1001",
+                  "description": "شناسه رهگیری سمت سامانه شما"
+                }
+              ]
+            },
+            "description": "گروه‌های دفترچه مخاطبین را به‌صورت صفحه‌بندی‌شده دریافت می‌کند.\n\n| پارامتر | محل | نوع | وضعیت | توضیح |\n| --- | --- | --- | --- | --- |\n| `page` | query | integer | اختیاری | شماره صفحه |\n| `per_page` | query | integer | اختیاری | تعداد گروه در هر صفحه |\n| `sort` | query | string | اختیاری | ترتیب نتیجه؛ مانند name |\n| `client_ref` | query | string | اختیاری | شناسه رهگیری سمت سامانه شما |"
+          },
+          "response": []
+        },
+        {
+          "name": "ایجاد گروه مخاطب",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/contact-groups",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "contact-groups"
+              ],
+              "query": []
+            },
+            "description": "یک گروه جدید برای دسته‌بندی مخاطبین دفترچه ایجاد می‌کند.\n\n| پارامتر | محل | نوع | وضعیت | توضیح |\n| --- | --- | --- | --- | --- |\n| `name` | body | string | الزامی | نام گروه؛ حداکثر 255 کاراکتر |\n| `description` | body | string | اختیاری | توضیح گروه |\n| `client_ref` | body | string | اختیاری | شناسه رهگیری سمت سامانه شما |",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"مشتریان ویژه\",\n  \"description\": \"مخاطبین دارای اولویت پاسخ‌گویی\",\n  \"client_ref\": \"group-create-1001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "حذف گروه مخاطب",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/contact-groups/{{contact_group_id}}",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "contact-groups",
+                "{{contact_group_id}}"
+              ],
+              "query": []
+            },
+            "description": "گروه مشخص‌شده را با شناسه آن حذف می‌کند.\n\n| پارامتر | محل | نوع | وضعیت | توضیح |\n| --- | --- | --- | --- | --- |\n| `contact_group_id` | path | string | الزامی | شناسه گروه |"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "صوت‌های انتظار، گزارش و فایل‌های صوتی",
+      "description": "این بخش منابع کمکی تماس، گزارش‌ها، صندوق‌های صوتی و دریافت فایل‌های ضبط‌شده را پوشش می‌دهد.",
+      "item": [
+        {
+          "name": "استعلام صوت‌های انتظار سرویس",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/music-on-holds?limit=100&client_ref=moh-1001",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "music-on-holds"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "100",
+                  "description": "حداکثر تعداد خروجی؛ پیش‌فرض و سقف 100"
+                },
+                {
+                  "key": "client_ref",
+                  "value": "moh-1001",
+                  "description": "شناسه رهگیری سمت سامانه شما"
+                }
+              ]
+            },
+            "description": "نام و مشخصات MusicOnHoldهای قابل استفاده برای سرویس انتخاب‌شده را برمی‌گرداند.\n\n| پارامتر | محل | نوع | وضعیت | توضیح |\n| --- | --- | --- | --- | --- |\n| `limit` | query | integer | اختیاری | حداکثر تعداد خروجی؛ پیش‌فرض و سقف 100 |\n| `client_ref` | query | string | اختیاری | شناسه رهگیری سمت سامانه شما |"
+          },
+          "response": []
+        },
+        {
+          "name": "دریافت گزارش تماس",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/call-reports?disposition=ANSWERED&call_type=INBOUND&has_recording=1&from=&to=&limit=20&page=1&client_ref=reports-1001",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "call-reports"
+              ],
+              "query": [
+                {
+                  "key": "disposition",
+                  "value": "ANSWERED",
+                  "description": "وضعیت تماس؛ مانند ANSWERED"
+                },
+                {
+                  "key": "call_type",
+                  "value": "INBOUND",
+                  "description": "نوع تماس: INBOUND، OUTBOUND یا INTERNAL"
+                },
+                {
+                  "key": "has_recording",
+                  "value": "1",
+                  "description": "عدد 1 برای تماس‌های دارای فایل ضبط"
+                },
+                {
+                  "key": "from",
+                  "value": "",
+                  "description": "تاریخ شروع با قالب YYYY-MM-DD"
+                },
+                {
+                  "key": "to",
+                  "value": "",
+                  "description": "تاریخ پایان با قالب YYYY-MM-DD"
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "تعداد رکورد در هر صفحه"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "شماره صفحه"
+                },
+                {
+                  "key": "client_ref",
+                  "value": "reports-1001",
+                  "description": "شناسه رهگیری سمت سامانه شما"
+                }
+              ]
+            },
+            "description": "گزارش تماس‌ها را با فیلتر وضعیت، نوع تماس، وجود فایل ضبط، بازه تاریخ و صفحه‌بندی دریافت می‌کند.\n\n| پارامتر | محل | نوع | وضعیت | توضیح |\n| --- | --- | --- | --- | --- |\n| `disposition` | query | string | اختیاری | وضعیت تماس؛ مانند ANSWERED |\n| `call_type` | query | string | اختیاری | نوع تماس: INBOUND، OUTBOUND یا INTERNAL |\n| `has_recording` | query | integer | اختیاری | عدد 1 برای تماس‌های دارای فایل ضبط |\n| `from` | query | date | اختیاری | تاریخ شروع با قالب YYYY-MM-DD |\n| `to` | query | date | اختیاری | تاریخ پایان با قالب YYYY-MM-DD |\n| `limit` | query | integer | اختیاری | تعداد رکورد در هر صفحه |\n| `page` | query | integer | اختیاری | شماره صفحه |\n| `client_ref` | query | string | اختیاری | شناسه رهگیری سمت سامانه شما |"
+          },
+          "response": []
+        },
+        {
+          "name": "دریافت فهرست صندوق‌های صوتی",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/voicemail-inboxes?context=&mailbox=&fullname=&limit=20&page=1&client_ref=voicemail-1001",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "voicemail-inboxes"
+              ],
+              "query": [
+                {
+                  "key": "context",
+                  "value": "",
+                  "description": "context صندوق صوتی"
+                },
+                {
+                  "key": "mailbox",
+                  "value": "",
+                  "description": "شماره mailbox"
+                },
+                {
+                  "key": "fullname",
+                  "value": "",
+                  "description": "نام نمایشی صندوق صوتی"
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "تعداد رکورد در هر صفحه"
+                },
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "شماره صفحه"
+                },
+                {
+                  "key": "client_ref",
+                  "value": "voicemail-1001",
+                  "description": "شناسه رهگیری سمت سامانه شما"
+                }
+              ]
+            },
+            "description": "صندوق‌های صوتی حساب را با امکان محدودکردن نتیجه به context و mailbox مشخص دریافت می‌کند.\n\n| پارامتر | محل | نوع | وضعیت | توضیح |\n| --- | --- | --- | --- | --- |\n| `context` | query | string | اختیاری | context صندوق صوتی |\n| `mailbox` | query | string | اختیاری | شماره mailbox |\n| `fullname` | query | string | اختیاری | نام نمایشی صندوق صوتی |\n| `limit` | query | integer | اختیاری | تعداد رکورد در هر صفحه |\n| `page` | query | integer | اختیاری | شماره صفحه |\n| `client_ref` | query | string | اختیاری | شناسه رهگیری سمت سامانه شما |"
+          },
+          "response": []
+        },
+        {
+          "name": "دریافت فایل ضبط مکالمه",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "*/*",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/call-recordings/{{cdr_id}}?call_details_record_id=cdr_detail_01J9M8K2Q7&client_ref=recording-1001",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "call-recordings",
+                "{{cdr_id}}"
+              ],
+              "query": [
+                {
+                  "key": "call_details_record_id",
+                  "value": "cdr_detail_01J9M8K2Q7",
+                  "description": "همان شناسه رکورد تماس در query string"
+                },
+                {
+                  "key": "client_ref",
+                  "value": "recording-1001",
+                  "description": "شناسه رهگیری سمت سامانه شما"
+                }
+              ]
+            },
+            "description": "فایل صوتی یک مکالمه را با شناسه رکورد تماس دانلود می‌کند.\n\n| پارامتر | محل | نوع | وضعیت | توضیح |\n| --- | --- | --- | --- | --- |\n| `cdr_id` | path | string | الزامی | شناسه رکورد تماس در مسیر درخواست |\n| `call_details_record_id` | query | string | الزامی | همان شناسه رکورد تماس در query string |\n| `client_ref` | query | string | اختیاری | شناسه رهگیری سمت سامانه شما |"
+          },
+          "response": []
+        },
+        {
+          "name": "دریافت فایل صندوق صوتی",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "*/*",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/voicemail-recordings/{{voicemail_unique_id}}?context=default&mailbox=1001&client_ref=voicemail-recording-1001",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "voicemail-recordings",
+                "{{voicemail_unique_id}}"
+              ],
+              "query": [
+                {
+                  "key": "context",
+                  "value": "default",
+                  "description": "context صندوق صوتی"
+                },
+                {
+                  "key": "mailbox",
+                  "value": "1001",
+                  "description": "شماره mailbox"
+                },
+                {
+                  "key": "client_ref",
+                  "value": "voicemail-recording-1001",
+                  "description": "شناسه رهگیری سمت سامانه شما"
+                }
+              ]
+            },
+            "description": "فایل پیام صوتی را با شناسه یکتا، context و شماره mailbox دانلود می‌کند.\n\n| پارامتر | محل | نوع | وضعیت | توضیح |\n| --- | --- | --- | --- | --- |\n| `voicemail_unique_id` | path | string | الزامی | شناسه یکتای پیام صوتی |\n| `context` | query | string | الزامی | context صندوق صوتی |\n| `mailbox` | query | string | الزامی | شماره mailbox |\n| `client_ref` | query | string | اختیاری | شناسه رهگیری سمت سامانه شما |"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "وبهوک رویداد تماس",
+      "description": "تنظیم عمومی دریافت رویدادها و مسیر اختصاصی رویدادهای ringing، hangup، missed_call و call_details_record در این بخش مدیریت می‌شود.",
+      "item": [
+        {
+          "name": "مشاهده تنظیمات وبهوک رویداد تماس",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/call-events-webhook",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "call-events-webhook"
+              ],
+              "query": []
+            },
+            "description": "تنظیم عمومی وبهوک، مسیرهای اختصاصی هر رویداد و وضعیت ثبت secret را برمی‌گرداند؛ مقدار secret در پاسخ افشا نمی‌شود.\n\nاین endpoint پارامتر ورودی ندارد."
+          },
+          "response": []
+        },
+        {
+          "name": "تنظیم وبهوک عمومی رویداد تماس",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/call-events-webhook",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "call-events-webhook"
+              ],
+              "query": []
+            },
+            "description": "نشانی عمومی دریافت همه رویدادهای تماس را ثبت یا به‌روزرسانی می‌کند. برای غیرفعال‌سازی، endpoint_url را خالی و is_active را false ارسال کنید؛ برای حذف secret از clear_secret استفاده کنید.\n\n| پارامتر | محل | نوع | وضعیت | توضیح |\n| --- | --- | --- | --- | --- |\n| `endpoint_url` | body | string (URL) | اختیاری | نشانی HTTP/HTTPS دریافت رویدادها؛ مقدار خالی برای غیرفعال‌سازی |\n| `secret` | body | string | اختیاری | secret اختصاصی برای اعتبارسنجی درخواست‌های وبهوک |\n| `clear_secret` | body | boolean | اختیاری | حذف secret ثبت‌شده در صورت true بودن |\n| `is_active` | body | boolean | اختیاری | فعال یا غیرفعال‌کردن ارسال رویدادها |\n| `client_ref` | body | string | اختیاری | شناسه رهگیری سمت سامانه شما |",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"endpoint_url\": \"https://example.org/webhooks/voipano/call\",\n  \"secret\": \"sample-strong-random-secret-value\",\n  \"clear_secret\": false,\n  \"is_active\": true,\n  \"client_ref\": \"webhook-1001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "تنظیم مسیر اختصاصی یک رویداد تماس",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/call-events-webhook",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "call-events-webhook"
+              ],
+              "query": []
+            },
+            "description": "برای یکی از رویدادهای ringing، hangup، missed_call یا call_details_record مسیر جداگانه ثبت می‌کند. ارسال endpoint_url خالی، مسیر همان رویداد را حذف می‌کند.\n\n| پارامتر | محل | نوع | وضعیت | توضیح |\n| --- | --- | --- | --- | --- |\n| `event` | body | enum | الزامی | یکی از ringing، hangup، missed_call یا call_details_record |\n| `endpoint_url` | body | string (URL) | اختیاری | نشانی HTTP/HTTPS اختصاصی رویداد؛ مقدار خالی برای حذف مسیر |\n| `secret` | body | string | اختیاری | secret اختصاصی برای اعتبارسنجی درخواست‌های وبهوک |\n| `clear_secret` | body | boolean | اختیاری | حذف secret ثبت‌شده در صورت true بودن |\n| `is_active` | body | boolean | اختیاری | فعال یا غیرفعال‌کردن مسیر این رویداد |\n| `client_ref` | body | string | اختیاری | شناسه رهگیری سمت سامانه شما |",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"call_details_record\",\n  \"endpoint_url\": \"https://example.org/webhooks/voipano/call\",\n  \"secret\": \"sample-strong-random-secret-value\",\n  \"clear_secret\": false,\n  \"is_active\": true,\n  \"client_ref\": \"webhook-route-1001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "تنظیم وبهوک با متد سازگار POST",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/call-events-webhook",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "call-events-webhook"
+              ],
+              "query": []
+            },
+            "description": "نام مستعار سازگار برای به‌روزرسانی تنظیم وبهوک است. برای پیاده‌سازی جدید، متد PUT ترجیح داده می‌شود.\n\n| پارامتر | محل | نوع | وضعیت | توضیح |\n| --- | --- | --- | --- | --- |\n| `endpoint_url` | body | string (URL) | اختیاری | نشانی HTTP/HTTPS دریافت رویدادها |\n| `secret` | body | string | اختیاری | secret اختصاصی برای اعتبارسنجی درخواست‌های وبهوک |\n| `clear_secret` | body | boolean | اختیاری | حذف secret ثبت‌شده در صورت true بودن |\n| `is_active` | body | boolean | اختیاری | فعال یا غیرفعال‌کردن ارسال رویدادها |\n| `client_ref` | body | string | اختیاری | شناسه رهگیری سمت سامانه شما |",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"endpoint_url\": \"https://example.org/webhooks/voipano/call\",\n  \"secret\": \"sample-strong-random-secret-value\",\n  \"clear_secret\": false,\n  \"is_active\": true,\n  \"client_ref\": \"webhook-post-1001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "endpointهای وب‌سرویس پیشرفته",
+      "description": "پس از آماده‌سازی دسترسی و منابع پایه، endpointهای اجرایی تماس برای OTP صوتی، تماس سریع و تماس امن در این بخش قرار می‌گیرند.",
+      "item": [
+        {
+          "name": "ارسال کد تأیید صوتی",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/call-otp",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "call-otp"
+              ],
+              "query": []
+            },
+            "description": "برای شماره مقصد یک تماس صوتی OTP ایجاد می‌کند و شناسه درخواست را برای رهگیری برمی‌گرداند. شماره مقصد حداکثر 32 کاراکتر و purpose و client_ref حداکثر 64 کاراکتر هستند.\n\n| پارامتر | محل | نوع | وضعیت | توضیح |\n| --- | --- | --- | --- | --- |\n| `phone_number` | body | string | الزامی | شماره مقصد OTP |\n| `purpose` | body | string | اختیاری | شناسه سناریوی درخواست |\n| `client_ref` | body | string | اختیاری | شناسه دلخواه سامانه شما برای رهگیری |\n| `payload` | body | object | اختیاری | متادیتای دلخواه سامانه شما |",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone_number\": \"09120000000\",\n  \"purpose\": \"login\",\n  \"client_ref\": \"otp-1001\",\n  \"payload\": {\n    \"user_id\": \"42\",\n    \"channel\": \"website\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "تماس سریع",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/click-to-call",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "click-to-call"
+              ],
+              "query": []
+            },
+            "description": "تماس واقعی را میان شماره مبدأ و مقصد آغاز می‌کند. نام‌های قدیمی from_number و to_number نیز پذیرفته می‌شوند؛ timeout بین 5 تا 120 و limit بین 5 تا 7200 ثانیه است.\n\n| پارامتر | محل | نوع | وضعیت | توضیح |\n| --- | --- | --- | --- | --- |\n| `call_source` | body | string | الزامی | شماره مبدأ تماس |\n| `call_destination` | body | string | الزامی | شماره مقصد تماس |\n| `timeout` | body | integer | اختیاری | زمان انتظار اولیه از 5 تا 120 ثانیه؛ پیش‌فرض 30 |\n| `limit` | body | integer | اختیاری | سقف مکالمه از 5 تا 7200 ثانیه |\n| `client_ref` | body | string | اختیاری | شناسه رهگیری سمت سامانه شما |\n| `payload` | body | object | اختیاری | متادیتای دلخواه سامانه شما |",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"call_source\": \"09120000000\",\n  \"call_destination\": \"09121111111\",\n  \"timeout\": 30,\n  \"limit\": 60,\n  \"client_ref\": \"click-1001\",\n  \"payload\": {\n    \"source\": \"website\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "تماس امن",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{api_base_url}}/secure-call",
+              "host": [
+                "{{api_base_url}}"
+              ],
+              "path": [
+                "secure-call"
+              ],
+              "query": []
+            },
+            "description": "تماس واقعی و امن را از طریق پراکسی ویپانو برقرار می‌کند و از موسیقی انتظار، callback و تلاش مجدد پشتیبانی می‌کند. callback باید HTTP/HTTPS و از نظر کنترل SSRF مجاز باشد.\n\n| پارامتر | محل | نوع | وضعیت | توضیح |\n| --- | --- | --- | --- | --- |\n| `call_source` | body | string | الزامی | شماره مبدأ تماس |\n| `call_destination` | body | string | الزامی | شماره مقصد تماس |\n| `timeout` | body | integer | اختیاری | زمان انتظار اولیه از 1 تا 120 ثانیه؛ پیش‌فرض 30 |\n| `limit` | body | integer | اختیاری | سقف مکالمه از 1 تا 7200 ثانیه |\n| `musiconhold` | body | string | اختیاری | شناسه MusicOnHold متعلق به خط انتخاب‌شده |\n| `callback_url` | body | string (URL) | اختیاری | نشانی HTTP/HTTPS دریافت رخدادهای همین تماس |\n| `retry_count` | body | integer | اختیاری | تعداد تلاش مجدد؛ پیش‌فرض 0 |\n| `retry_delay_seconds` | body | integer | اختیاری | فاصله تلاش‌های مجدد برحسب ثانیه؛ حداقل 1 |\n| `client_ref` | body | string | اختیاری | شناسه رهگیری سمت سامانه شما |\n| `payload` | body | object | اختیاری | متادیتای دلخواه سامانه شما |",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"call_source\": \"09120000000\",\n  \"call_destination\": \"09121111111\",\n  \"timeout\": 30,\n  \"limit\": 60,\n  \"musiconhold\": \"MUSIC_ON_HOLD\",\n  \"callback_url\": \"https://example.com/webhooks/voipano/call\",\n  \"retry_count\": 0,\n  \"retry_delay_seconds\": 30,\n  \"client_ref\": \"secure-1001\",\n  \"payload\": {\n    \"source\": \"website\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
