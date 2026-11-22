@@ -15,7 +15,7 @@ The official, synchronous Python SDK for the **Voipano Public Webservice API v1*
 After the first PyPI release:
 
 ```bash
-python -m pip install voipano-sdk
+python -m pip install voipano
 ```
 
 Set an environment variable in your application environment (do not commit credentials):
@@ -162,10 +162,10 @@ To enable the initial release:
 
 1. Create a GitHub repository (suggested `voipano/python-voipano`) and upload the **contents** of this source repository.
 2. Create a GitHub environment called **`pypi`**, ideally with required reviewers. If the GitHub owner/repository differs from the suggested link, edit the URLs in `pyproject.toml` before releasing.
-3. On [PyPI](https://pypi.org/manage/account/publishing/), configure a **pending Trusted Publisher** for distribution **`voipano-sdk`**: GitHub owner `<your-owner>`, repository `<your-repository>`, workflow filename **`publish.yml`**, environment name **`pypi`**. Pending publishers create the PyPI project at first successful publish.
-4. When your GitHub tests pass, create and push tag `v1.0.0` to trigger the release workflow. Do **not** upload `dist/` or API credentials to GitHub.
+3. On [PyPI](https://pypi.org/manage/account/publishing/), configure a **pending Trusted Publisher** for distribution **`voipano`**: GitHub owner `<your-owner>`, repository `<your-repository>`, workflow filename **`publish.yml`**, environment name **`pypi`**. Pending publishers create the PyPI project at first successful publish.
+4. When your GitHub tests pass, create and push tag `v1.0.1` to trigger the release workflow. Do **not** upload `dist/` or API credentials to GitHub.
 
-PyPI names are global and can be unavailable or reserved even if search does not find a project; confirm that `voipano-sdk` is accepted when registering the Trusted Publisher. A published release's version cannot be overwritten: create a new version/tag for future updates.
+PyPI names are global and can be unavailable or reserved even if search does not find a project; confirm that `voipano` is accepted when registering the Trusted Publisher. A published release's version cannot be overwritten: create a new version/tag for future updates.
 
 The Postman collection contains **no example JSON responses** and does not document inbound webhook signatures, rate limits or idempotency guarantees. Automated tests verify request contracts and the SDK's handling of mock responses; they do not establish live API compatibility.
 

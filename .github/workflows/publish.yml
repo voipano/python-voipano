@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/voipano-sdk
+      url: https://pypi.org/p/voipano
     permissions:
       id-token: write
     steps:

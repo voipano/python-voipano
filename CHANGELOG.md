@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.0.1] - 2026-11-22
+
+- Publish the official PyPI distribution as `voipano`.
+- Preserve compatibility with the existing Python import API.
+
 ## [1.0.0] - 2026-11-22
 
 - Initial Python SDK for the Voipano Public Webservice API v1 (23 documented requests).

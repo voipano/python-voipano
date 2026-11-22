@@ -12,7 +12,7 @@
 پس از اولین انتشار در PyPI:
 
 ```bash
-python -m pip install voipano-sdk
+python -m pip install voipano
 ```
 
 متغیرهای محیطی برنامه خود را تنظیم کنید؛ توکن را هرگز در Git ثبت نکنید:
@@ -86,7 +86,7 @@ python -m build
 python -m twine check dist/*
 ```
 
-فایل‌های GitHub Actions آماده‌اند: تست در `tests.yml` و انتشار امن در `publish.yml` با **Trusted Publishing** بدون API Token در مخزن. برای اولین انتشار باید در حساب PyPI یک **Pending Trusted Publisher** برای پروژه `voipano-sdk` بسازید و مالک GitHub، نام ریپازیتوری، نام workflow برابر `publish.yml` و environment برابر `pypi` را ثبت کنید. سپس پس از موفقیت تست‌های GitHub، تگ `v1.0.0` را Push کنید. در GitHub هم environment با نام `pypi` ایجاد شود. اگر نام Repository با `voipano/python-voipano` متفاوت بود، لینک‌های `pyproject.toml` را اصلاح کنید.
+فایل‌های GitHub Actions آماده‌اند: تست در `tests.yml` و انتشار امن در `publish.yml` با **Trusted Publishing** بدون API Token در مخزن. برای اولین انتشار باید در حساب PyPI یک **Pending Trusted Publisher** برای پروژه `voipano` بسازید و مالک GitHub، نام ریپازیتوری، نام workflow برابر `publish.yml` و environment برابر `pypi` را ثبت کنید. سپس پس از موفقیت تست‌های GitHub، تگ `v1.0.1` را Push کنید. در GitHub هم environment با نام `pypi` ایجاد شود. اگر نام Repository با `voipano/python-voipano` متفاوت بود، لینک‌های `pyproject.toml` را اصلاح کنید.
 
 مستندات Postman پاسخ‌های نمونه و جزئیات امنیتی وبهوک را ندارد؛ بنابراین تست‌های Mock جایگزین بررسی واقعی API نمی‌شوند.
 

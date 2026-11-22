@@ -177,7 +177,7 @@ class Transport:
             "Authorization": f"Bearer {self.token}",
             "Accept": "*/*" if binary else "application/json",
             "X-Request-Id": self.request_id or str(uuid.uuid4()),
-            "User-Agent": "voipano-python/1.0.0",
+            "User-Agent": "voipano-python/1.0.1",
         }
         if self.service_id.strip():
             headers["X-Webservice-Service-Id"] = self.service_id
