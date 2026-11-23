@@ -20,6 +20,8 @@
 python -m pip install voipano
 ```
 
+صفحه رسمی پکیج: [PyPI](https://pypi.org/project/voipano/)
+
 متغیرهای محیطی برنامه خود را تنظیم کنید؛ توکن را هرگز در Git ثبت نکنید:
 
 ```dotenv

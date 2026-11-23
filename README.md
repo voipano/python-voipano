@@ -23,6 +23,8 @@ Install the published package from PyPI:
 python -m pip install voipano
 ```
 
+Official package: [PyPI](https://pypi.org/project/voipano/)
+
 Set an environment variable in your application environment (do not commit credentials):
 
 ```dotenv
