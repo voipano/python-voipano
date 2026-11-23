@@ -1,5 +1,10 @@
 # Voipano Python SDK
 
+[![Tests](https://github.com/voipano/python-voipano/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/voipano/python-voipano/actions/workflows/tests.yml)
+[![PyPI Version](https://img.shields.io/pypi/v/voipano)](https://pypi.org/project/voipano/)
+[![License](https://img.shields.io/github/license/voipano/python-voipano)](LICENSE)
+[![Documentation](https://img.shields.io/badge/docs-EN%20%7C%20FA-blue)](README.md)
+
 [فارسی](README.fa.md) · [Postman collection](docs/voipano-webservice.postman_collection.json) · [Security](SECURITY.md)
 
 The official, synchronous Python SDK for the **Voipano Public Webservice API v1**, providing the documented **23 requests** from the Postman collection dated **2026-11-21**. Designed for ordinary Python, Django, Flask, FastAPI, and other Python applications; there is **no framework dependency**.
@@ -12,7 +17,7 @@ The official, synchronous Python SDK for the **Voipano Public Webservice API v1*
 
 ## Install
 
-After the first PyPI release:
+Install the published package from PyPI:
 
 ```bash
 python -m pip install voipano
@@ -156,16 +161,11 @@ python -m build
 python -m twine check dist/*
 ```
 
-`.github/workflows/tests.yml` runs tests on Python 3.11–3.15. `.github/workflows/publish.yml` builds, retests, checks metadata, and publishes on `v*` tags using **PyPI Trusted Publishing** (OIDC, no PyPI token stored in GitHub).
+`.github/workflows/tests.yml` runs tests on Python 3.11-3.15. Pushes to `main` trigger `publish.yml`, where `python-semantic-release` determines whether a new version is needed from Conventional Commit messages.
 
-To enable the initial release:
+When a release is created, its distributions are built, tested, validated, and published to PyPI through Trusted Publishing (OIDC).
 
-1. Create a GitHub repository (suggested `voipano/python-voipano`) and upload the **contents** of this source repository.
-2. Create a GitHub environment called **`pypi`**, ideally with required reviewers. If the GitHub owner/repository differs from the suggested link, edit the URLs in `pyproject.toml` before releasing.
-3. On [PyPI](https://pypi.org/manage/account/publishing/), configure a **pending Trusted Publisher** for distribution **`voipano`**: GitHub owner `<your-owner>`, repository `<your-repository>`, workflow filename **`publish.yml`**, environment name **`pypi`**. Pending publishers create the PyPI project at first successful publish.
-4. When your GitHub tests pass, create and push tag `v1.0.1` to trigger the release workflow. Do **not** upload `dist/` or API credentials to GitHub.
-
-PyPI names are global and can be unavailable or reserved even if search does not find a project; confirm that `voipano` is accepted when registering the Trusted Publisher. A published release's version cannot be overwritten: create a new version/tag for future updates.
+The package is already published on [PyPI](https://pypi.org/project/voipano/). For future releases, merge reviewed changes into `main`. Do not manually create or move release tags, overwrite published versions, or commit credentials and build artifacts.
 
 The Postman collection contains **no example JSON responses** and does not document inbound webhook signatures, rate limits or idempotency guarantees. Automated tests verify request contracts and the SDK's handling of mock responses; they do not establish live API compatibility.
 

@@ -1,5 +1,10 @@
 # SDK رسمی پایتون ویپانو
 
+[![Tests](https://github.com/voipano/python-voipano/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/voipano/python-voipano/actions/workflows/tests.yml)
+[![PyPI Version](https://img.shields.io/pypi/v/voipano)](https://pypi.org/project/voipano/)
+[![License](https://img.shields.io/github/license/voipano/python-voipano)](LICENSE)
+[![Documentation](https://img.shields.io/badge/docs-EN%20%7C%20FA-blue)](README.fa.md)
+
 [English README](README.md) · [کالکشن Postman](docs/voipano-webservice.postman_collection.json)
 
 کتابخانه پایتون برای اتصال ساده به **Voipano Public Webservice API v1** که هر **۲۳ درخواست** کالکشن مورخ **۲۰۲۶/۱۱/۲۱** را پوشش می‌دهد. بدون وابستگی به Django، Flask یا FastAPI و قابل استفاده در همه برنامه‌های معمول پایتون.
@@ -9,7 +14,7 @@
 - حداقل **Python 3.11**؛ قدیمی‌ترین نسخه پایتون تحت پشتیبانی امنیتی در نوامبر ۲۰۲۶.
 - توکن معتبر وب‌سرویس ویپانو.
 
-پس از اولین انتشار در PyPI:
+نصب پکیج منتشرشده از PyPI:
 
 ```bash
 python -m pip install voipano
@@ -86,7 +91,11 @@ python -m build
 python -m twine check dist/*
 ```
 
-فایل‌های GitHub Actions آماده‌اند: تست در `tests.yml` و انتشار امن در `publish.yml` با **Trusted Publishing** بدون API Token در مخزن. برای اولین انتشار باید در حساب PyPI یک **Pending Trusted Publisher** برای پروژه `voipano` بسازید و مالک GitHub، نام ریپازیتوری، نام workflow برابر `publish.yml` و environment برابر `pypi` را ثبت کنید. سپس پس از موفقیت تست‌های GitHub، تگ `v1.0.1` را Push کنید. در GitHub هم environment با نام `pypi` ایجاد شود. اگر نام Repository با `voipano/python-voipano` متفاوت بود، لینک‌های `pyproject.toml` را اصلاح کنید.
+تست‌های GitHub Actions روی Python 3.11 تا 3.15 اجرا می‌شوند. گردش‌کار `publish.yml` هنگام Push به `main` فعال می‌شود. ابزار `python-semantic-release` بر اساس پیام کامیت‌های استاندارد تشخیص می‌دهد که آیا نسخه جدید لازم است یا خیر.
+
+در صورت ایجاد نسخه جدید، فایل‌های انتشار ساخته، تست و اعتبارسنجی می‌شوند و سپس از طریق Trusted Publishing (OIDC) در PyPI منتشر می‌شوند.
+
+پکیج هم‌اکنون در [PyPI](https://pypi.org/project/voipano/) منتشر شده است. برای انتشار نسخه‌های بعدی، تغییرات بررسی‌شده را در `main` ادغام کنید. تگ انتشار را دستی ایجاد یا جابه‌جا نکنید، نسخه منتشرشده را بازنویسی نکنید و اطلاعات محرمانه یا فایل‌های خروجی ساخت را در Git ثبت نکنید.
 
 مستندات Postman پاسخ‌های نمونه و جزئیات امنیتی وبهوک را ندارد؛ بنابراین تست‌های Mock جایگزین بررسی واقعی API نمی‌شوند.
 
